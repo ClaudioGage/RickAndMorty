@@ -9,6 +9,7 @@ import { Favorite } from './modules/entities/favorite.entity';
 
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/user.module';
+import { ExternalApiModule } from './modules/external-api/external-api.module';
 
 
 
@@ -45,6 +46,7 @@ import { UsersModule } from './modules/users/user.module';
       }),
     }),
 
+    ExternalApiModule,
     UsersModule,
     AuthModule,
   ],
