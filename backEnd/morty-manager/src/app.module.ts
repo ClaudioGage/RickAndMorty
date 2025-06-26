@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CacheModule } from '@nestjs/cache-manager';
-import { APP_FILTER } from '@nestjs/core';
 
 import { User } from './modules/entities/user.entity';
 import { Favorite } from './modules/entities/favorite.entity';
@@ -10,6 +9,8 @@ import { Favorite } from './modules/entities/favorite.entity';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/user.module';
 import { ExternalApiModule } from './modules/external-api/external-api.module';
+import { FavoritesModule } from './modules/favorites/favorites.module';
+import { CharactersModule } from './modules/characters/characters.module';
 
 
 
@@ -46,6 +47,8 @@ import { ExternalApiModule } from './modules/external-api/external-api.module';
       }),
     }),
 
+    CharactersModule,
+    FavoritesModule,
     ExternalApiModule,
     UsersModule,
     AuthModule,
