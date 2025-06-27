@@ -9,14 +9,31 @@ import { User } from '../entities/user.entity';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
+  
+  private getMockAuthResponse(username: string, email: string) {
+    return {
+      user: {
+        id: 1,
+        username,
+        email,
+      },
+      token: 'mock-jwt-token',
+    };
+  }
 
   @Post('register')
   async register(@Body() registerDto: RegisterDto) {
+    if (process.env.BYPASS_AUTH === 'true') {
+      return this.getMockAuthResponse(registerDto.username, registerDto.email);
+    }
     return this.authService.register(registerDto);
   }
 
   @Post('login')
   async login(@Body() loginDto: LoginDto) {
+    if (process.env.BYPASS_AUTH === 'true') {
+      return this.getMockAuthResponse('testuser', loginDto.email);
+    }
     return this.authService.login(loginDto);
   }
 

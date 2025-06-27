@@ -7,9 +7,11 @@ import { AuthService } from './auth.service';
 import { User } from '../entities/user.entity';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { UsersModule } from '../users/user.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule,
     PassportModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'test',
