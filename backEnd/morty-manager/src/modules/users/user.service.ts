@@ -65,7 +65,7 @@ export class UsersService {
   async getUserWithFavorites(id: number): Promise<User> {
     const user = await this.usersRepository.findWithFavorites(id);
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('User not found with favorites');
     }
     return user;
   }
