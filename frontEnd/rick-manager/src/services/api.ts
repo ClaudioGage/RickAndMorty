@@ -1,8 +1,9 @@
 import axios from 'axios';
-import { User, Character, CharactersResponse, AuthResponse, CharacterQueryParams } from '../types';
+import { Character, CharactersResponse, AuthResponse, CharacterQueryParams } from '../types';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3007/api';
 
+// Create axios instance
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -10,6 +11,7 @@ const apiClient = axios.create({
   },
 });
 
+// Add auth token to requests
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -18,6 +20,7 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
+// Handle auth errors
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -31,117 +34,87 @@ apiClient.interceptors.response.use(
 );
 
 export const api = {
+  // Authentication
   login: async (email: string, password: string): Promise<AuthResponse> => {
-    // Mock implementation - replace with real API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    if (email === 'test@test.com' && password === 'password') {
-      return { 
-        access_token: 'mock-token', 
-        user: { id: 1, username: 'testuser', email: 'test@test.com' } 
-      };
+    try {
+      const response = await apiClient.post('/auth/login', { email, password });
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || 'Login failed');
     }
-    throw new Error('Invalid credentials');
   },
 
   register: async (username: string, email: string, password: string): Promise<AuthResponse> => {
-    // Mock implementation - replace with real API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    return { 
-      access_token: 'mock-token', 
-      user: { id: 1, username, email } 
-    };
+    try {
+      const response = await apiClient.post('/auth/register', { username, email, password });
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || 'Registration failed');
+    }
   },
 
+  // Characters
   getCharacters: async (params: CharacterQueryParams): Promise<CharactersResponse> => {
-    // Mock implementation - replace with real API call
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    const mockCharacters: Character[] = [
-      {
-        id: 1,
-        name: 'Rick Sanchez',
-        status: 'Alive',
-        species: 'Human',
-        type: '',
-        gender: 'Male',
-        origin: { name: 'Earth (C-137)', url: '' },
-        location: { name: 'Citadel of Ricks', url: '' },
-        image: 'https://rickandmortyapi.com/api/character/avatar/1.jpeg',
-        episode: [],
-        url: '',
-        created: '2017-11-04T18:48:46.250Z',
-        isFavorite: false
-      },
-      {
-        id: 2,
-        name: 'Morty Smith',
-        status: 'Alive',
-        species: 'Human',
-        type: '',
-        gender: 'Male',
-        origin: { name: 'unknown', url: '' },
-        location: { name: 'Citadel of Ricks', url: '' },
-        image: 'https://rickandmortyapi.com/api/character/avatar/2.jpeg',
-        episode: [],
-        url: '',
-        created: '2017-11-04T18:50:21.651Z',
-        isFavorite: true
-      },
-      {
-        id: 3,
-        name: 'Summer Smith',
-        status: 'Alive',
-        species: 'Human',
-        type: '',
-        gender: 'Female',
-        origin: { name: 'Earth (Replacement Dimension)', url: '' },
-        location: { name: 'Earth (Replacement Dimension)', url: '' },
-        image: 'https://rickandmortyapi.com/api/character/avatar/3.jpeg',
-        episode: [],
-        url: '',
-        created: '2017-11-04T19:09:56.428Z',
-        isFavorite: false
-      }
-    ];
-
-    return {
-      info: { count: 3, pages: 1, next: null, prev: null },
-      results: mockCharacters
-    };
+    try {
+      // Clean up undefined values from params
+      const cleanParams = Object.fromEntries(
+        Object.entries(params).filter(([_, value]) => value !== undefined && value !== '')
+      );
+      
+      const response = await apiClient.get('/characters', { params: cleanParams });
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || 'Failed to load characters');
+    }
   },
 
+  getCharacter: async (id: number): Promise<Character> => {
+    try {
+      const response = await apiClient.get(`/characters/${id}`);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || 'Character not found');
+    }
+  },
+
+  searchCharacters: async (searchTerm: string, params: CharacterQueryParams): Promise<CharactersResponse> => {
+    try {
+      const cleanParams = Object.fromEntries(
+        Object.entries(params).filter(([_, value]) => value !== undefined && value !== '')
+      );
+      
+      const response = await apiClient.get('/characters/search', { 
+        params: { q: searchTerm, ...cleanParams } 
+      });
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || 'Search failed');
+    }
+  },
+
+  getFavoriteCharacters: async (): Promise<Character[]> => {
+    try {
+      const response = await apiClient.get('/characters/favorites');
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || 'Failed to load favorites');
+    }
+  },
+
+  // Favorites
   addToFavorites: async (characterId: number): Promise<void> => {
-    await new Promise(resolve => setTimeout(resolve, 300));
+    try {
+      await apiClient.post(`/characters/${characterId}/favorite`);
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || 'Failed to add to favorites');
+    }
   },
 
   removeFromFavorites: async (characterId: number): Promise<void> => {
-    await new Promise(resolve => setTimeout(resolve, 300));
+    try {
+      await apiClient.delete(`/characters/${characterId}/favorite`);
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || 'Failed to remove from favorites');
+    }
   },
 };
-
-/*
-export const api = {
-  login: async (email: string, password: string): Promise<AuthResponse> => {
-    const response = await apiClient.post('/auth/login', { email, password });
-    return response.data;
-  },
-
-  register: async (username: string, email: string, password: string): Promise<AuthResponse> => {
-    const response = await apiClient.post('/auth/register', { username, email, password });
-    return response.data;
-  },
-
-  getCharacters: async (params: CharacterQueryParams): Promise<CharactersResponse> => {
-    const response = await apiClient.get('/characters', { params });
-    return response.data;
-  },
-
-  addToFavorites: async (characterId: number): Promise<void> => {
-    await apiClient.post(`/characters/${characterId}/favorite`);
-  },
-
-  removeFromFavorites: async (characterId: number): Promise<void> => {
-    await apiClient.delete(`/characters/${characterId}/favorite`);
-  },
-};
-*/
