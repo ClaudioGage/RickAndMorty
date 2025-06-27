@@ -104,7 +104,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
     <PageContainer>
       <FormContainer>
         <Title>Welcome Back</Title>
-        <Subtitle>Sign in to explore the Rick & Morty universe</Subtitle>
+        <Subtitle>Sign in for the Rick & Morty Hauffe experience</Subtitle>
 
         <form onSubmit={handleSubmit}>
           <Input
